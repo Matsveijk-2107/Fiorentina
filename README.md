@@ -1,4 +1,4 @@
-# Florentina: incremental match-event pipeline
+# Fiorentina: incremental match-event pipeline
 
 A small, reproducible pipeline that turns per-match JSON into typed, queryable
 Parquet and re-runs incrementally. Only new or changed matches get reprocessed,
