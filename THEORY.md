@@ -13,7 +13,7 @@ confrontabili giocatori con minutaggi diversi.
    `outcome="goal"`. Per ogni giocatore sommo l'`xg` dei tiri e conto i gol; la
    differenza gol − xG dice se ha reso più o meno di quanto valessero le
    occasioni. È più stabile del semplice conteggio gol perché tiene conto di
-   quanto erano buone le occasioni. La struttura come colonne in
+   quanto erano buone le occasioni. La strutturo come colonne in
    `player_match_stats` e la sommo in `player_season_stats`, dove aggiungo anche
    gol/90 e xG/90.
 
@@ -29,8 +29,10 @@ confrontabili giocatori con minutaggi diversi.
    (tasso di successo) e il volume normalizzato sui minuti. Le due insieme danno
    un quadro più onesto del solo conteggio.
 
-Tutte e tre sono incrementali: ricalcolo solo i giocatori delle partite cambiate
-e ri-aggrego i gruppi toccati. Le ho implementate come bonus in `metrics.py`.
+Le ho implementate come bonus in `metrics.py`. A questa scala ricalcolo l'intero
+gold ogni volta che cambia il silver (è sotto il secondo); su volumi grandi
+ricalcolerei solo i `match_id` toccati e ri-aggregherei i gruppi stagione
+interessati.
 
 ---
 

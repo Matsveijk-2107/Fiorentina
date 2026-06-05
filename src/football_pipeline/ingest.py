@@ -93,7 +93,7 @@ def resolve_ownership(sources: list[Path]) -> tuple[dict[int, Path], dict[Path, 
     for path in sources:  # already in precedence order
         try:
             mid = _peek_match_id(path)
-        except (ValueError, KeyError, OSError) as exc:
+        except (ValueError, KeyError, TypeError, OSError) as exc:
             log.error("cannot read match_id from %s: %s", path, exc)
             continue
         mid_by_path[path] = mid
