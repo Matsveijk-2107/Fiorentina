@@ -1,0 +1,21 @@
+# Pipeline output (derived data — reproducible from raw JSON, never committed)
+warehouse/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+Thumbs.db

@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "football-pipeline"
+version = "1.0.0"
+description = "Incremental match-event pipeline: typed, queryable Parquet from JSON, with true incremental re-runs."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Mats van Eijk" }]
+dependencies = [
+    "duckdb>=1.0",
+    "pyarrow>=14",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-cov>=5",
+    "ruff>=0.6",
+    "mypy>=1.10",
+    "bandit>=1.7",
+]
+
+[project.scripts]
+football-pipeline = "football_pipeline.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Coverage gate: fail under 80%.
+addopts = "-q --cov=football_pipeline --cov-report=term-missing --cov-fail-under=80"
+pythonpath = ["src"]
+
+# --- Lint + format (ruff replaces black + isort + flake8) ------------------- #
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, isort, bugbear, comprehensions, pyupgrade, naming.
+select = ["E", "F", "I", "B", "C4", "UP", "N", "W"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests import the conftest builder and use assert freely.
+"tests/*" = ["E501"]
+
+# --- Type checking ---------------------------------------------------------- #
+[tool.mypy]
+python_version = "3.10"
+files = ["src"]
+ignore_missing_imports = true   # duckdb/pyarrow ship partial stubs
+warn_unused_ignores = true
+warn_redundant_casts = true
+
+# --- Security scanning ------------------------------------------------------ #
+[tool.bandit]
+exclude_dirs = ["tests"]
+
+# --- Coverage --------------------------------------------------------------- #
+[tool.coverage.run]
+source = ["football_pipeline"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = ["pragma: no cover", "if __name__ == .__main__.:", "raise SystemExit"]
