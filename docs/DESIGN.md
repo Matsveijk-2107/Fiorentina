@@ -55,6 +55,23 @@ works.
 
 ## 4. The incremental mechanism: content hashing + a manifest
 
+The run as a whole looks like this:
+
+```
+candidate_dataset/data/raw/<Competition>/<match_id>.json   ─┐
+candidate_dataset/data/raw_update/<Competition>/<id>.json  ─┤  (precedence: update wins)
+                                                            │
+            ┌───────────────────────────────────────────────┘
+            ▼
+   discover → resolve ownership → hash → parse+validate (only if changed) → write
+                                                            │
+                                                            ▼
+   warehouse/
+     matches/<id>.parquet   players/<id>.parquet   events/<id>.parquet     ← silver (one file/match)
+     gold/player_match_stats.parquet  gold/player_season_stats.parquet     ← gold (metrics)
+     _state/manifest.json                                                   ← incremental memory
+```
+
 mtime lies the moment a file is copied or re-checked-out, so change detection
 hashes the bytes instead, with SHA-256. An unchanged file is then provably
 unchanged, and the corrected `1003`, which differs by content, gets caught.
