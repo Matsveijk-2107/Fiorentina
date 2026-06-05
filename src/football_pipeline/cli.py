@@ -6,6 +6,7 @@ Subcommands:
     query    run a named query or raw --sql; render as table/csv/json
     status   show manifest summary (what is materialised, last run)
     queries  list available named queries
+    verify   re-read the written Parquet and re-assert invariants
 
 Designed so the whole exercise runs from one command:
     python -m football_pipeline run
@@ -20,7 +21,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import __version__, metrics, queries, warehouse_db
+from . import __version__, metrics, queries, verify, warehouse_db
 from .config import DEFAULT_SOURCES, layout_for
 from .ingest import run_ingest
 from .logging_utils import configure, get_logger
@@ -165,6 +166,18 @@ def _cmd_status(args) -> int:
     return 0
 
 
+def _cmd_verify(args) -> int:
+    layout = layout_for(args.warehouse)
+    report = verify.run_verify(layout)
+    if report.ok:
+        print("verify: OK, all invariants hold.")
+        return 0
+    print("verify: FAILED", file=sys.stderr)
+    for problem in report.problems:
+        print(f"  - {problem}", file=sys.stderr)
+    return 1
+
+
 # --------------------------------------------------------------------------- #
 # Parser.
 # --------------------------------------------------------------------------- #
@@ -199,6 +212,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("queries", help="list named queries").set_defaults(func=_cmd_queries)
     sub.add_parser("status", help="show pipeline status").set_defaults(func=_cmd_status)
+    sub.add_parser("verify", help="re-read the warehouse and re-assert invariants").set_defaults(
+        func=_cmd_verify
+    )
     return p
 
 

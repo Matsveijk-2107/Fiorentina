@@ -110,3 +110,16 @@ def test_metrics_subcommand(populated, capsys):
     _, wh = populated
     assert main(["--warehouse", str(wh), "metrics"]) == 0
     assert "Gold recomputed" in capsys.readouterr().out
+
+
+def test_verify_ok_on_clean_warehouse(populated, capsys):
+    _, wh = populated
+    assert main(["--warehouse", str(wh), "verify"]) == 0
+    assert "OK" in capsys.readouterr().out
+
+
+def test_verify_fails_when_warehouse_is_inconsistent(populated, capsys):
+    _, wh = populated
+    (wh / "events" / "1.parquet").unlink()  # break reconciliation for match 1
+    assert main(["--warehouse", str(wh), "verify"]) == 1
+    assert "FAILED" in capsys.readouterr().err
