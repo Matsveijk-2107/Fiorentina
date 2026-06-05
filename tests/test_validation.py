@@ -64,11 +64,14 @@ def test_missing_required_field_raises():
         parse_match(raw, "x.json", "h")
 
 
-def test_unknown_position_raises():
+def test_unknown_position_is_a_warning_not_an_error():
+    # SCHEMA.md doesn't enumerate positions, so an unfamiliar code must not
+    # reject an otherwise-valid match; it's surfaced as a soft warning instead.
     raw = make_match(1)
     raw["players"][0]["position"] = "WIZARD"
-    with pytest.raises(ValidationError, match="unknown position"):
-        parse_match(raw, "x.json", "h")
+    parsed, warnings = parse_match(raw, "x.json", "h")
+    assert parsed is not None
+    assert any(w.code == "unknown_position" for w in warnings)
 
 
 def test_negative_score_raises():

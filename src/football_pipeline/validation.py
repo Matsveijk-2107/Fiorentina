@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 
 from .models import (
@@ -31,6 +32,7 @@ from .models import (
 )
 
 _COORD_MIN, _COORD_MAX = 0.0, 100.0
+_MAX_MINUTE = 150  # upper bound for an event minute (regulation + extra time + stoppage)
 
 
 class ValidationError(ValueError):
@@ -80,8 +82,6 @@ def _iso_date(value, where: str) -> str:
     """
     s = _as_str(value, where)
     try:
-        from datetime import date
-
         date.fromisoformat(s)
     except ValueError:
         raise ValidationError(f"{where}: '{s}' is not an ISO date (YYYY-MM-DD)") from None
@@ -121,9 +121,11 @@ def _parse_players(raw_players, match_id: int) -> tuple[Player, ...]:
         if pid in seen:
             raise ValidationError(f"{where}: duplicate player_id {pid}")
         seen.add(pid)
+        # Position must be a non-empty string, but we don't hard-fail on an
+        # unfamiliar code: SCHEMA.md doesn't enumerate the allowed set, so a real
+        # feed may use codes we haven't seen. Anything outside VALID_POSITIONS is
+        # surfaced as a soft warning in _quality_checks instead of rejecting the match.
         position = _as_str(_require(p, "position", where), f"{where}.position")
-        if position not in VALID_POSITIONS:
-            raise ValidationError(f"{where}.position: unknown position {position!r}")
         minutes = _as_int(_require(p, "minutes", where), f"{where}.minutes")
         if not (0 <= minutes <= 130):  # generous upper bound incl. extra time
             raise ValidationError(f"{where}.minutes: {minutes} out of range")
@@ -174,8 +176,8 @@ def _parse_event(raw: dict, match_id: int, idx: int) -> Event:
                 raise ValidationError(f"{where}.xg: {xg} out of range [0, 1]")
 
     minute = _as_int(_require(raw, "minute", where), f"{where}.minute")
-    if minute < 0:
-        raise ValidationError(f"{where}.minute: {minute} must be >= 0")
+    if not (0 <= minute <= _MAX_MINUTE):  # generous: covers extra time
+        raise ValidationError(f"{where}.minute: {minute} out of range [0, {_MAX_MINUTE}]")
     second = _as_int(_require(raw, "second", where), f"{where}.second")
     if not (0 <= second < 60):
         raise ValidationError(f"{where}.second: {second} out of range [0, 59]")
@@ -302,6 +304,27 @@ def _quality_checks(
         warnings.append(
             DataQualityWarning(
                 match.match_id, "orphan_event_player", f"player_ids not in roster: {orphan[:10]}"
+            )
+        )
+
+    # 3) Positions outside the known set are flagged, not rejected (see _parse_players).
+    unknown_positions = sorted({p.position for p in players if p.position not in VALID_POSITIONS})
+    if unknown_positions:
+        warnings.append(
+            DataQualityWarning(
+                match.match_id,
+                "unknown_position",
+                f"positions not in known set: {unknown_positions}",
+            )
+        )
+
+    # 4) Every event type carries an outcome in the schema; a missing one silently
+    #    degrades downstream metrics (e.g. a pass with no outcome is never "complete").
+    missing_outcome = sum(1 for e in events if e.outcome is None)
+    if missing_outcome:
+        warnings.append(
+            DataQualityWarning(
+                match.match_id, "missing_outcome", f"{missing_outcome} event(s) have no outcome"
             )
         )
 
