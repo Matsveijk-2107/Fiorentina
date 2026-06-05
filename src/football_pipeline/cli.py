@@ -121,6 +121,7 @@ def _cmd_query(args) -> int:
             "limit": args.limit,
             "min_passes": args.min_passes,
             "min_tackles": args.min_tackles,
+            "min_shots": args.min_shots,
             "match_id": args.match_id,
         }
         try:
@@ -191,6 +192,7 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--limit", type=int, default=10)
     q.add_argument("--min-passes", type=int, default=30, dest="min_passes")
     q.add_argument("--min-tackles", type=int, default=10, dest="min_tackles")
+    q.add_argument("--min-shots", type=int, default=3, dest="min_shots")
     q.add_argument("--match-id", type=int, default=None, dest="match_id")
     q.add_argument("--format", choices=["table", "csv", "json"], default="table")
     q.set_defaults(func=_cmd_query)

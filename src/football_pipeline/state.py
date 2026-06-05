@@ -13,12 +13,15 @@ leaves a half-written manifest.
 from __future__ import annotations
 
 import json
+import logging
 import os
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from datetime import datetime, timezone
 from pathlib import Path
 
 STATE_VERSION = 1
+
+log = logging.getLogger("state")
 
 
 @dataclass
@@ -47,9 +50,24 @@ class PipelineState:
         if not path.exists():
             return cls()
         data = json.loads(path.read_text(encoding="utf-8"))
-        sources = {k: SourceRecord(**v) for k, v in data.get("sources", {}).items()}
+        # Forward-compatibility: a manifest written by a newer version may carry
+        # fields this code doesn't know about. Rather than crash on restart, fall
+        # back to a clean rebuild (the warehouse is fully derivable from raw).
+        version = data.get("version", STATE_VERSION)
+        if version != STATE_VERSION:
+            log.warning(
+                "manifest version %s != %s; ignoring it and rebuilding from scratch",
+                version,
+                STATE_VERSION,
+            )
+            return cls()
+        known = {f.name for f in fields(SourceRecord)}
+        sources = {
+            k: SourceRecord(**{fk: fv for fk, fv in v.items() if fk in known})
+            for k, v in data.get("sources", {}).items()
+        }
         return cls(
-            version=data.get("version", STATE_VERSION),
+            version=version,
             runs=data.get("runs", 0),
             last_run_at=data.get("last_run_at"),
             sources=sources,

@@ -73,6 +73,9 @@ def _top_scorers(con, params):
 
 def _top_xg(con, params):
     con.execute("SET VARIABLE lim = $limit", {"limit": params.get("limit", 10)})
+    con.execute("SET VARIABLE mins = $min_shots", {"min_shots": params.get("min_shots", 3)})
+    # Volume-gate the leaderboard: ranking by cumulative xG without a shot floor
+    # lets a single high-xG chance outrank a striker with a season of shots.
     return con.sql(
         """
         SELECT name, competition, season,
@@ -81,6 +84,7 @@ def _top_xg(con, params):
                SUM(shots) AS shots
         FROM player_match_stats
         GROUP BY player_id, name, competition, season
+        HAVING SUM(shots) >= getvariable('mins')
         ORDER BY xg DESC
         LIMIT getvariable('lim')
         """
@@ -95,10 +99,12 @@ def _best_pass_completion(con, params):
         SELECT name, competition, season,
                SUM(passes) AS passes,
                SUM(passes_completed) AS completed,
-               ROUND(100.0 * SUM(passes_completed) / SUM(passes), 1) AS pass_completion_pct
+               CASE WHEN SUM(passes) > 0
+                    THEN ROUND(100.0 * SUM(passes_completed) / SUM(passes), 1) END
+                    AS pass_completion_pct
         FROM player_match_stats
         GROUP BY player_id, name, competition, season
-        HAVING SUM(passes) >= getvariable('minp')
+        HAVING SUM(passes) >= getvariable('minp') AND SUM(passes) > 0
         ORDER BY pass_completion_pct DESC
         LIMIT getvariable('lim')
         """

@@ -89,9 +89,10 @@ SELECT
     player_id,
     competition,
     season,
-    -- a player can change clubs; report the most recent name/team seen
-    arg_max(name, match_date)    AS name,
-    arg_max(team_id, match_date) AS team_id,
+    -- a player can change clubs; report the most recent name/team seen.
+    -- tie-break same-date matches by match_id so the pick is deterministic.
+    arg_max(name, (match_date, match_id))    AS name,
+    arg_max(team_id, (match_date, match_id)) AS team_id,
     COUNT(DISTINCT match_id)     AS matches_played,
     SUM(minutes)                 AS minutes,
     SUM(goals)                   AS goals,

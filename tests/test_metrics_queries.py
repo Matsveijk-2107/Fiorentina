@@ -73,3 +73,10 @@ def test_goals_minus_xg_sign(built_warehouse):
         "SELECT goals_minus_xg FROM player_match_stats WHERE match_id=1 AND player_id=10",
     )
     assert rel.fetchone()[0] > 0
+
+
+def test_top_xg_respects_shot_floor(built_warehouse):
+    # An unreachable shot floor leaves the leaderboard empty.
+    assert queries.run_named(built_warehouse, "top_xg", {"min_shots": 100}).fetchall() == []
+    # A floor of 1 admits players who actually took shots.
+    assert queries.run_named(built_warehouse, "top_xg", {"min_shots": 1}).fetchall()

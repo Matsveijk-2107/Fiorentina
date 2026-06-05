@@ -127,8 +127,9 @@ that change confined to `metrics.py`.
 - No secrets, no network, no shell-out, and all input is validated at the
   boundary.
 - Every write is atomic, and the output directory is disposable and git-ignored.
-- bandit runs clean. The two internal SQL strings it can't see through are
-  quote-escaped and annotated, and no user input reaches them.
+- bandit runs clean. Its one real flag is the view-creation SQL string in
+  `warehouse_db.py`, which is quote-escaped and reachable only by internal,
+  non-user input; it's annotated with a justified `# nosec`.
 
 ## 9. Quality gate
 

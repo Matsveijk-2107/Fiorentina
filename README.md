@@ -191,6 +191,7 @@ src/football_pipeline/
   metrics.py       gold layer (SQL): per-player metrics
   queries.py       named, parameterised analytical queries
   cli.py           run / metrics / query / status / queries
+  logging_utils.py single point for log configuration
 tests/             pytest suite
 docs/BRIEF.md      original take-home brief (preserved)
 docs/DESIGN.md     design decisions & trade-offs

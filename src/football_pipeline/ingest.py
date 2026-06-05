@@ -202,17 +202,18 @@ def run_ingest(
         )
 
     # Handle deletions: matches that previously existed but have no source now.
-    # Guard against transient read errors: only prune when the previous owning
-    # source file is genuinely gone from disk, not merely unreadable this run.
+    # Only prune when the previous owning source file is genuinely gone from disk.
+    # If it still exists, the match just wasn't in this run's --source set (a
+    # narrower run) or it failed to read this time; either way, keep the output.
     live_match_ids = set(owner_by_match.keys())
     for mid_str, prev_owner_path in list(state.match_owner.items()):
         mid = int(mid_str)
         if mid in live_match_ids:
             continue
         if (REPO_ROOT / prev_owner_path).exists():
-            log.warning(
-                "match %s has no resolvable source this run but %s still exists "
-                "(transient read error?); keeping existing output",
+            log.info(
+                "match %s not covered by this run's sources (%s still on disk); "
+                "keeping existing output",
                 mid,
                 prev_owner_path,
             )

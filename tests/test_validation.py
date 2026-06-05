@@ -97,3 +97,18 @@ def test_xg_out_of_range_raises():
             break
     with pytest.raises(ValidationError, match=r"xg: .* out of range"):
         parse_match(raw, "x.json", "h")
+
+
+def test_event_minute_above_max_raises():
+    raw = make_match(1)
+    raw["events"][0]["minute"] = 9999
+    with pytest.raises(ValidationError, match="minute: .* out of range"):
+        parse_match(raw, "x.json", "h")
+
+
+def test_missing_event_outcome_is_a_warning():
+    raw = make_match(1)
+    del raw["events"][0]["outcome"]  # a pass with no outcome
+    parsed, warnings = parse_match(raw, "x.json", "h")
+    assert parsed is not None
+    assert any(w.code == "missing_outcome" for w in warnings)
