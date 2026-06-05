@@ -14,28 +14,19 @@ trade-offs I made are in [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## Quick start
 
-One command runs the whole thing.
+`run.ps1` installs the two dependencies and walks the whole story: initial
+batch, then an idempotent re-run, then the update batch, then a few example
+questions.
 
-Windows (PowerShell):
 ```powershell
 ./run.ps1
 ```
 
-macOS / Linux:
-```bash
-./run.sh
-```
+To drive it yourself (two dependencies, `duckdb` and `pyarrow`):
 
-Either script installs the two dependencies and walks the whole story: initial
-batch, then an idempotent re-run, then the update batch, then a few example
-questions.
-
-If you'd rather drive it yourself, you need two dependencies (`duckdb` and
-`pyarrow`):
-
-```bash
+```powershell
 pip install -r requirements.txt
-export PYTHONPATH=src                 # PowerShell: $env:PYTHONPATH="src"
+$env:PYTHONPATH = "src"
 
 # 1) initial batch
 python -m football_pipeline run --source candidate_dataset/data/raw
@@ -44,6 +35,9 @@ python -m football_pipeline run --source candidate_dataset/data/raw --source can
 # 3) ask questions
 python -m football_pipeline query top_scorers --limit 10
 ```
+
+(On macOS/Linux the commands are identical; use `export PYTHONPATH=src` instead
+of the `$env:` line.)
 
 By default `run` uses both batches (`raw` + `raw_update`), so a plain
 `python -m football_pipeline run` also works end to end.
@@ -106,8 +100,7 @@ identical re-run does no work at all. A re-export overwrites its own match in
 place and leaves the rest alone. Incremental, idempotent, and self-correcting,
 built into the plumbing rather than bolted on after.
 
-You can watch all three happen in one go via `run.ps1` / `run.sh`. Typical
-output:
+You can watch all three happen in one go via `run.ps1`. Typical output:
 
 ```
 [1/4] Initial batch  -> processed 24, unchanged 0
@@ -168,7 +161,7 @@ real cross-match aggregation; it just has nothing to combine in this dataset.
 
 ## Tests
 
-```bash
+```powershell
 pip install -e ".[dev]"     # pytest, pytest-cov, ruff, mypy, bandit
 python -m pytest            # runs the tests and the coverage gate
 ```
@@ -179,8 +172,9 @@ reprocessing, correction override, deletion, full-refresh), and the
 metrics/queries on a small known dataset. Coverage sits at 92%, with the gate
 set to fail under 80%.
 
-`make quality` (or `quality.ps1` on Windows) also runs ruff, mypy, and bandit;
-their settings live in `pyproject.toml`.
+The lint/type/security tools are configured in `pyproject.toml` and run with
+`python -m ruff check src tests`, `python -m mypy src/football_pipeline`, and
+`python -m bandit -r src`.
 
 ---
 
@@ -203,8 +197,7 @@ tests/             pytest suite
 docs/BRIEF.md      original take-home brief (preserved)
 docs/DESIGN.md     design decisions & trade-offs
 THEORY.md          theory answers (Italian)
-run.ps1 / run.sh   one-command demo
-quality.ps1        lint, format, type, security, and test checks
+run.ps1            one-command demo
 pyproject.toml     dependencies and tool config (ruff/mypy/bandit/coverage)
 ```
 
