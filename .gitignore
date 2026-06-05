@@ -1,4 +1,4 @@
-# Pipeline output (derived data — reproducible from raw JSON, never committed)
+# Pipeline output (derived data, reproducible from raw JSON; never committed)
 warehouse/
 
 # Python
