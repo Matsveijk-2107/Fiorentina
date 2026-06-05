@@ -1,0 +1,1 @@
+# Dataset per il take-home\nLeggi il brief (PDF) per le istruzioni. In `data/raw/` trovi il lotto iniziale; in `data/raw_update/` il lotto successivo (per l'incrementale). Schema in SCHEMA.md. Buon lavoro!\n
