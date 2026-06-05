@@ -133,19 +133,22 @@ that change confined to `metrics.py`.
 
 ## 9. Quality gate
 
-Wired for the usual Python toolchain, configured in `pyproject.toml`:
+Wired for the usual Python toolchain, configured in `pyproject.toml` and run on
+every push by a GitHub Actions workflow (`.github/workflows/ci.yml`):
 
 - ruff for lint (pyflakes, pycodestyle, isort, bugbear, pyupgrade, naming) and
   formatting. Clean. (`python -m ruff check src tests`)
 - mypy for type checking across `src/`. Clean.
 - bandit for the security scan. Clean.
-- pytest plus pytest-cov: 39 tests, 92% coverage, gate fails under 80%.
+- pytest plus pytest-cov: 50 tests, 92% coverage, gate fails under 80%.
+
+There's also a `verify` command (`python -m football_pipeline verify`) that
+re-reads the written Parquet and independently re-asserts the runtime invariants:
+goals reconcile with the score, event ids are unique within a match, required
+columns are never null, and the manifest agrees with what's on disk.
 
 ## 10. What I'd add with more time
 
-- A `verify` command that re-reads the written Parquet and re-asserts the
-  invariants.
 - Schema-drift detection in the manifest, to warn when a new field appears.
 - Partitioning by competition, plus compaction, once match counts climb.
 - A persistent DuckDB catalog if interactive querying becomes a regular thing.
-- CI running the lint/type/test checks on every push.

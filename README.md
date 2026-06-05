@@ -164,15 +164,15 @@ pip install -e ".[dev]"     # pytest, pytest-cov, ruff, mypy, bandit
 python -m pytest            # runs the tests and the coverage gate
 ```
 
-39 tests cover validation (types, ranges, enums, reconciliation warnings),
+50 tests cover validation (types, ranges, enums, and the soft warnings),
 content hashing, the incremental guarantees (idempotency, change-only
-reprocessing, correction override, deletion, full-refresh), and the
-metrics/queries on a small known dataset. Coverage sits at 92%, with the gate
-set to fail under 80%.
+reprocessing, correction override, deletion, full-refresh), manifest round-trip
+and version handling, the metrics and queries on a small known dataset, and the
+`verify` command. Coverage sits at 92%, with the gate set to fail under 80%.
 
-The lint/type/security tools are configured in `pyproject.toml` and run with
-`python -m ruff check src tests`, `python -m mypy src/football_pipeline`, and
-`python -m bandit -r src`.
+ruff, mypy, and bandit are configured in `pyproject.toml`, and a GitHub Actions
+workflow (`.github/workflows/ci.yml`) runs the whole gate (lint, format, types,
+security, tests) on every push.
 
 ---
 
@@ -190,13 +190,15 @@ src/football_pipeline/
   warehouse_db.py  DuckDB connection with views over the Parquet
   metrics.py       gold layer (SQL): per-player metrics
   queries.py       named, parameterised analytical queries
-  cli.py           run / metrics / query / status / queries
+  verify.py        independent re-read of the warehouse to re-assert invariants
+  cli.py           run / metrics / query / status / queries / verify
   logging_utils.py single point for log configuration
 tests/             pytest suite
 docs/BRIEF.md      original take-home brief (preserved)
 docs/DESIGN.md     design decisions & trade-offs
 THEORY.md          theory answers (Italian)
 run.sh / run.ps1   one-command demo (macOS-Linux / Windows)
+.github/workflows  CI (lint, format, types, security, tests)
 pyproject.toml     dependencies and tool config (ruff/mypy/bandit/coverage)
 ```
 
