@@ -14,19 +14,20 @@ trade-offs I made are in [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## Quick start
 
-`run.ps1` installs the two dependencies and walks the whole story: initial
+One script installs the two dependencies and walks the whole story: initial
 batch, then an idempotent re-run, then the update batch, then a few example
 questions.
 
-```powershell
-./run.ps1
+```bash
+./run.sh        # macOS / Linux
+./run.ps1       # Windows (PowerShell)
 ```
 
 To drive it yourself (two dependencies, `duckdb` and `pyarrow`):
 
-```powershell
+```bash
 pip install -r requirements.txt
-$env:PYTHONPATH = "src"
+export PYTHONPATH=src            # PowerShell: $env:PYTHONPATH="src"
 
 # 1) initial batch
 python -m football_pipeline run --source candidate_dataset/data/raw
@@ -35,9 +36,6 @@ python -m football_pipeline run --source candidate_dataset/data/raw --source can
 # 3) ask questions
 python -m football_pipeline query top_scorers --limit 10
 ```
-
-(On macOS/Linux the commands are identical; use `export PYTHONPATH=src` instead
-of the `$env:` line.)
 
 By default `run` uses both batches (`raw` + `raw_update`), so a plain
 `python -m football_pipeline run` also works end to end.
@@ -197,7 +195,7 @@ tests/             pytest suite
 docs/BRIEF.md      original take-home brief (preserved)
 docs/DESIGN.md     design decisions & trade-offs
 THEORY.md          theory answers (Italian)
-run.ps1            one-command demo
+run.sh / run.ps1   one-command demo (macOS-Linux / Windows)
 pyproject.toml     dependencies and tool config (ruff/mypy/bandit/coverage)
 ```
 
