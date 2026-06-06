@@ -119,10 +119,12 @@ def _top_tacklers(con, params):
         SELECT name, competition, season,
                SUM(tackles) AS tackles,
                SUM(tackles_won) AS tackles_won,
-               ROUND(100.0 * SUM(tackles_won) / SUM(tackles), 1) AS tackle_win_pct
+               CASE WHEN SUM(tackles) > 0
+                    THEN ROUND(100.0 * SUM(tackles_won) / SUM(tackles), 1) END
+                    AS tackle_win_pct
         FROM player_match_stats
         GROUP BY player_id, name, competition, season
-        HAVING SUM(tackles) >= getvariable('minp')
+        HAVING SUM(tackles) >= getvariable('minp') AND SUM(tackles) > 0
         ORDER BY tackle_win_pct DESC, tackles_won DESC
         LIMIT getvariable('lim')
         """
@@ -182,7 +184,7 @@ REGISTRY: dict[str, NamedQuery] = {
             _goals_per_competition,
         ),
         NamedQuery("top_scorers", "Top scorers (params: limit)", _top_scorers),
-        NamedQuery("top_xg", "Highest cumulative xG (params: limit)", _top_xg),
+        NamedQuery("top_xg", "Highest cumulative xG (params: limit, min_shots)", _top_xg),
         NamedQuery(
             "best_pass_completion",
             "Best passers (params: min_passes, limit)",

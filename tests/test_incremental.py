@@ -71,8 +71,8 @@ def test_corrected_match_in_update_batch_overrides_initial(tmp_path, match_build
     assert any(s.endswith("raw/100.json") for s in r.shadowed)
 
 
-def test_ownership_is_deterministic_regardless_of_dir_order(tmp_path, writer):
-    """raw_update always wins for a shared match, because it is later in the list."""
+def test_later_in_list_wins_for_shared_match(tmp_path, writer):
+    """The later source dir wins for a shared match: precedence follows list order."""
     raw = tmp_path / "raw"
     upd = tmp_path / "raw_update"
     writer(raw, make_match(7, home_goals=1))

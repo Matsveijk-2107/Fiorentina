@@ -75,6 +75,15 @@ def test_goals_minus_xg_sign(built_warehouse):
     assert rel.fetchone()[0] > 0
 
 
+def test_top_tacklers_excludes_zero_tackle_players_when_unfiltered(built_warehouse):
+    # With no minimum, zero-tackle player-seasons must not surface (no 0/0 -> NaN rows).
+    rel = queries.run_named(built_warehouse, "top_tacklers", {"min_tackles": 0})
+    rows = rel.fetchall()
+    tackles = rel.columns.index("tackles")
+    assert rows  # at least one player has tackles
+    assert all(r[tackles] > 0 for r in rows)
+
+
 def test_top_xg_respects_shot_floor(built_warehouse):
     # An unreachable shot floor leaves the leaderboard empty.
     assert queries.run_named(built_warehouse, "top_xg", {"min_shots": 100}).fetchall() == []
