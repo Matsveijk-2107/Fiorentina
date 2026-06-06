@@ -119,10 +119,10 @@ output is stable and diffs cleanly.
 ## 6. Keys and a data-modelling note
 
 `event_id` is unique within a match but resets between matches. I checked, and
-the same id turns up in as many as 24 of them. So the real key for an event is
-`(match_id, event_id)`, and that's what the code uses throughout. It's the sort
-of assumption ("ids are global") that looks fine until it quietly corrupts a
-join, so I nailed it down rather than hope.
+the low ids turn up in every match (all 28 across both batches). So the real key
+for an event is `(match_id, event_id)`, and that's what the code uses throughout.
+It's the sort of assumption ("ids are global") that looks fine until it quietly
+corrupts a join, so I nailed it down rather than hope.
 
 ## 7. Layers: silver vs gold, and incremental gold
 
