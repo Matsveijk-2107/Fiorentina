@@ -131,11 +131,12 @@ Gold sits on top, `player_match_stats` for the per match-player building blocks
 and `player_season_stats` for the per-90 rates that let you compare players with
 different minutes.
 
-Gold only recomputes when silver actually changed in a run. A full recompute here
-is sub-second, so I rebuild it wholesale rather than diffing partitions, which is
-simpler and plainly correct. At real scale you'd recompute only the affected
-matches and re-aggregate the season and player groups they touch; the code keeps
-that change confined to `metrics.py`.
+Gold recomputes when silver changes in a run (and on a full refresh, or to
+rebuild a missing gold file). A full recompute here is sub-second, so I rebuild
+it wholesale rather than diffing partitions, which is simpler and plainly
+correct. At real scale you'd recompute only the affected matches and re-aggregate
+the season and player groups they touch; the code keeps that change confined to
+`metrics.py`.
 
 ## 8. Security & safety touches
 
@@ -157,7 +158,7 @@ every push by a GitHub Actions workflow (`.github/workflows/ci.yml`):
   formatting. Clean. (`python -m ruff check src tests`)
 - mypy for type checking across `src/`. Clean.
 - bandit for the security scan. Clean.
-- pytest plus pytest-cov: 50 tests, 92% coverage, gate fails under 80%.
+- pytest plus pytest-cov: 51 tests, 92% coverage, gate fails under 80%.
 
 There's also a `verify` command (`python -m football_pipeline verify`) that
 re-reads the written Parquet and independently re-asserts the runtime invariants:

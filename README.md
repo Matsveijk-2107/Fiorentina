@@ -51,8 +51,8 @@ rather than dropping the load. The why behind each of these is in
 | `goals_per_competition` | goals, shots, average xG per shot |
 | `top_scorers --limit N` | leading scorers (goals, xG, goals−xG) |
 | `top_xg --limit N --min-shots N` | highest cumulative xG (shot-volume gated) |
-| `best_pass_completion --min-passes N` | most accurate passers |
-| `top_tacklers --min-tackles N` | best tackle win % |
+| `best_pass_completion --min-passes N --limit N` | most accurate passers |
+| `top_tacklers --min-tackles N --limit N` | best tackle win % |
 | `match_summary --match-id ID` | one-match summary |
 | `data_quality_goals_vs_score` | goals-vs-score reconciliation |
 
@@ -63,7 +63,7 @@ rather than dropping the load. The why behind each of these is in
 
 ```bash
 pip install -e ".[dev]"
-python -m pytest          # 50 tests, ~92% coverage (gate fails under 80%)
+python -m pytest          # 51 tests, ~92% coverage (gate fails under 80%)
 ```
 
 ruff, mypy, and bandit are configured in `pyproject.toml` and run in CI

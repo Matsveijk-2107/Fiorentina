@@ -16,7 +16,8 @@ little work as possible:
 That gives three properties worth stating plainly. It is incremental (only new
 or changed matches touch disk), idempotent (a second identical run does no
 work), and correcting (a re-exported match overwrites just its own partition,
-and gold downstream is recomputed only when silver actually changed).
+and gold downstream is recomputed when silver changes, plus on a full refresh or
+when the gold output is missing).
 """
 
 from __future__ import annotations

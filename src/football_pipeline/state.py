@@ -50,9 +50,11 @@ class PipelineState:
         if not path.exists():
             return cls()
         data = json.loads(path.read_text(encoding="utf-8"))
-        # Forward-compatibility: a manifest written by a newer version may carry
-        # fields this code doesn't know about. Rather than crash on restart, fall
-        # back to a clean rebuild (the warehouse is fully derivable from raw).
+        # Forward-compatibility: a manifest written by a different schema version
+        # is treated as unreadable and we rebuild from scratch rather than crash on
+        # restart (the warehouse is fully derivable from raw). Within a known
+        # version, unknown fields are tolerated, not a trigger: extra keys are
+        # filtered out below.
         version = data.get("version", STATE_VERSION)
         if version != STATE_VERSION:
             log.warning(
